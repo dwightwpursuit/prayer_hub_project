@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -21,3 +21,5 @@ def submit_request():
         # Redirect back to the home page after submission
         return "Prayer request submitted successfully! Check your console."
         # We'll change the return later to be more user-friendly
+if __name__ == '__main__':
+    app.run(debug=True)
