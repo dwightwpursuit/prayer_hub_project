@@ -27,10 +27,13 @@
 
     <div class="prayer-list">
         <h2>Current Prayer Requests</h2>
-        {% if requests %} {# Check if the 'requests' list is not empty #}
+        {% if requests %}
             <ul>
-            {% for request in requests %} {# Loop through each request in the list #}
-                <li class="prayer-item">{{ request }}</li> {# Display the request #}
+            {% for request in requests %}
+                <li class="prayer-item">
+                    <strong>{{ request.request_text }}</strong> {# Display the actual text #}
+                    <small> - Submitted: {{ request.timestamp }}</small> {# Display the timestamp #}
+                </li>
             {% endfor %}
             </ul>
         {% else %}
