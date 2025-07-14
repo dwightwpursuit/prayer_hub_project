@@ -15,7 +15,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS requests (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             request_text TEXT NOT NULL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            prayed_for_count INTEGER DEFAULT 0  -- NEW COLUMN ADDED HERE
         )
     ''')
     conn.commit()
@@ -26,7 +27,8 @@ init_db() # Ensure the database table is created when the app starts
 @app.route('/')
 def home():
     conn = get_db_connection()
-    db_requests = conn.execute('SELECT id, request_text, timestamp FROM requests ORDER BY timestamp DESC').fetchall()
+    # Ensure you select the new 'prayed_for_count' column
+    db_requests = conn.execute('SELECT id, request_text, timestamp, prayed_for_count FROM requests ORDER BY timestamp DESC').fetchall()
     conn.close()
     return render_template('home.html', requests=db_requests)
 

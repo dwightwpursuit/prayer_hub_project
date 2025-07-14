@@ -49,7 +49,7 @@
                                 <div class="prayer-meta">
                                     Submitted: {{ request.timestamp }}
                                     {# Placeholder for 'Prayed For' badge - will be implemented later #}
-                                    <span class="badge bg-secondary ms-2">Prayed For: 0</span>
+                                    <span class="badge bg-secondary ms-2">Prayed For: {{ request.prayed_for_count }}</span>
                                 </div>
                                 {# Placeholder for 'Prayed For' button - will be implemented later #}
                                 <button class="btn btn-light-outline mt-3">Pray for this</button>
