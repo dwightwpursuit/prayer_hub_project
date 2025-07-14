@@ -32,18 +32,14 @@ def home():
     conn.close()
     return render_template('home.html', requests=db_requests)
 
-@app.route('/submit_request', methods=['POST'])
-def submit_request():
-    if request.method == 'POST':
-        new_request_text = request.form['request_text']
-
-        conn = get_db_connection()
-        conn.execute('INSERT INTO requests (request_text) VALUES (?)', (new_request_text,))
-        conn.commit()
-        conn.close()
-
-        print(f"New prayer request submitted and saved to DB: {new_request_text}")
-        return redirect(url_for('home'))
+@app.route('/pray_for/<int:request_id>', methods=['POST'])
+def increment_pray_count(request_id):
+    conn = get_db_connection()
+    conn.execute('UPDATE requests SET prayed_for_count = prayed_for_count + 1 WHERE id = ?', (request_id,))
+    conn.commit()
+    conn.close()
+    print(f"Incremented pray count for request ID: {request_id}")
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(debug=True)
