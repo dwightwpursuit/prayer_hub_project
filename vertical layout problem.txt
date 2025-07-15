@@ -1,0 +1,31 @@
+<h2 class="mb-4 text-center">Current Prayer Requests</h2>
+
+        {# This is the crucial 'row' container that makes the columns work #}
+        <div class="row">
+            {% if requests %}
+                {% for request in requests %}
+                    {# Each prayer request needs to be wrapped in a 'col' div #}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card prayer-item-card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ request.request_text }}</h5>
+                                <div class="prayer-meta">
+                                    Submitted: {{ request.timestamp }}
+                                    <span class="badge bg-secondary ms-2">Prayed For: {{ request.prayed_for_count }}</span>
+                                </div>
+                                <form action="{{ url_for('increment_pray_count', request_id=request.id) }}" method="POST">
+                                    <button type="submit" class="btn btn-light-outline mt-3">Pray for this</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center">No prayer requests submitted yet. Be the first!</p>
+            {% endif %}
+        </div>
+        {# The 'row' div closes here #}
+
+</div> {# This closes the main 'container' div #}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

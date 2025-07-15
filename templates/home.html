@@ -16,11 +16,34 @@
         .prayer-meta .badge { margin-left: 5px; }
         .btn-light-outline { border: 1px solid #ced4da; color: #495057; background-color: #fff; padding: 5px 10px; border-radius: 5px; font-size: 0.9em; }
         .btn-light-outline:hover { background-color: #f8f9fa; }
+        /* Adjusted card title margin for consistency */
+        .prayer-item-card .card-title { margin-bottom: 0.5rem; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="my-4 text-center">Community Prayer Hub</h1>
+
+        {# Filter by Category Section #}
+        <div class="card mb-4">
+            <div class="card-header">Filter Prayers by Category</div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2"> {# Use flexbox for spacing #}
+                    {# Link to show all prayers #}
+                    <a href="{{ url_for('home') }}" class="btn {% if not selected_category %}btn-primary{% else %}btn-outline-primary{% endif %}">Show All</a>
+
+                    {# Loop through unique categories and create a button for each #}
+                    {% for category_row in unique_categories %}
+                        {% set category_name = category_row.category %} {# Access the 'category' field from the row object #}
+                        <a href="{{ url_for('home', category=category_name) }}"
+                           class="btn {% if selected_category == category_name %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                           {{ category_name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {# End Filter Section #}
 
         <div class="card form-card mb-5">
             <div class="card-header">
@@ -32,6 +55,11 @@
                         <label for="request_text" class="form-label">Your Prayer Request:</label>
                         <textarea class="form-control" id="request_text" name="request_text" rows="5" required placeholder="Type your full prayer request here"></textarea>
                     </div>
+                    {# Category Input Field #}
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category (Optional):</label>
+                        <input type="text" class="form-control" id="category" name="category" placeholder="e.g., Health, Family, Finances">
+                    </div>
                     <button type="submit" class="btn btn-primary">Submit Prayer</button>
                 </form>
             </div>
@@ -39,11 +67,11 @@
 
         <h2 class="mb-4 text-center">Current Prayer Requests</h2>
 
-        {# This is the crucial 'row' container that makes the columns work #}
+        {# THIS IS THE CRUCIAL 'row' DIV THAT MAKES THE GRID WORK #}
         <div class="row">
             {% if requests %}
                 {% for request in requests %}
-                    {# Each prayer request needs to be wrapped in a 'col' div #}
+                    {# EACH PRAYER CARD MUST BE INSIDE ITS OWN 'col' DIV #}
                     <div class="col-md-6 col-lg-4">
                         <div class="card prayer-item-card">
                             <div class="card-body">
@@ -51,10 +79,33 @@
                                 <div class="prayer-meta">
                                     Submitted: {{ request.timestamp }}
                                     <span class="badge bg-secondary ms-2">Prayed For: {{ request.prayed_for_count }}</span>
+                                    {# Display Category if it exists #}
+                                    {% if request.category %}
+                                        <span class="badge bg-info ms-2">{{ request.category }}</span>
+                                    {% endif %}
+                                    {# Display Answered Badge #}
+                                    {% if request.is_answered %}
+                                        <span class="badge bg-success ms-2">Answered!</span>
+                                    {% endif %}
                                 </div>
-                                <form action="{{ url_for('increment_pray_count', request_id=request.id) }}" method="POST">
-                                    <button type="submit" class="btn btn-light-outline mt-3">Pray for this</button>
-                                </form>
+
+                                {# Group buttons for better layout #}
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    {# Form for Pray for this button #}
+                                    <form action="{{ url_for('increment_pray_count', request_id=request.id) }}" method="POST" class="me-2">
+                                        <button type="submit" class="btn btn-light-outline">Pray for this</button>
+                                    </form>
+
+                                    {# Form for Mark as Answered button (only show if not answered) #}
+                                    {% if not request.is_answered %}
+                                        <form action="{{ url_for('mark_as_answered', request_id=request.id) }}" method="POST">
+                                            <button type="submit" class="btn btn-success btn-sm">Mark as Answered</button>
+                                        </form>
+                                    {% else %}
+                                        {# Optional: Display something else if answered, or just remove the button #}
+                                        <small class="text-muted">Prayer answered.</small>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -63,10 +114,10 @@
                 <p class="text-center">No prayer requests submitted yet. Be the first!</p>
             {% endif %}
         </div>
-        {# The 'row' div closes here #}
+        {# END OF THE 'row' DIV THAT CONTAINS ALL PRAYER CARDS #}
 
-</div> {# This closes the main 'container' div #}
+    </div> {# This closes the main 'container' div #}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
