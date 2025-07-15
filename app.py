@@ -95,5 +95,44 @@ def mark_as_answered(request_id):
     print(f"Prayer request ID: {request_id} marked as answered.")
     return redirect(url_for('home'))
 
+@app.route('/delete_request/<int:request_id>', methods=['POST'])
+def delete_request(request_id):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM requests WHERE id = ?', (request_id,))
+    conn.commit()
+    conn.close()
+    print(f"Prayer request ID: {request_id} deleted.")
+    return redirect(url_for('home'))
+
+# NEW: Route to display the edit form
+@app.route('/edit_request/<int:request_id>')
+def edit_request(request_id):
+    conn = get_db_connection()
+    # Fetch the specific request to pre-fill the form
+    # We only need the text and category for editing on this page
+    request_to_edit = conn.execute('SELECT id, request_text, category FROM requests WHERE id = ?', (request_id,)).fetchone()
+    conn.close()
+
+    if request_to_edit is None:
+        # If no request found with that ID, return a 404 error
+        return "Prayer request not found!", 404
+    return render_template('edit_request.html', request=request_to_edit)
+
+# NEW: Route to handle the submission of the updated form
+@app.route('/update_request/<int:request_id>', methods=['POST'])
+def update_request(request_id):
+    if request.method == 'POST':
+        updated_text = request.form['request_text']
+        updated_category = request.form.get('category', '').strip()
+
+        conn = get_db_connection()
+        conn.execute('UPDATE requests SET request_text = ?, category = ? WHERE id = ?',
+                     (updated_text, updated_category if updated_category else None, request_id))
+        conn.commit()
+        conn.close()
+
+        print(f"Prayer request ID: {request_id} updated.")
+        return redirect(url_for('home'))
+
 if __name__ == '__main__':
     app.run(debug=True)

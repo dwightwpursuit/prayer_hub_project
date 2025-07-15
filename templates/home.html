@@ -67,11 +67,12 @@
 
         <h2 class="mb-4 text-center">Current Prayer Requests</h2>
 
-        {# THIS IS THE CRUCIAL 'row' DIV THAT MAKES THE GRID WORK #}
+        {# IMPORTANT: This 'row' div is essential for Bootstrap's column system. #}
+        {# It must wrap all the 'col-md-6 col-lg-4' divs. #}
         <div class="row">
             {% if requests %}
                 {% for request in requests %}
-                    {# EACH PRAYER CARD MUST BE INSIDE ITS OWN 'col' DIV #}
+                    {# EACH PRAYER CARD MUST BE INSIDE ITS OWN 'col' div. #}
                     <div class="col-md-6 col-lg-4">
                         <div class="card prayer-item-card">
                             <div class="card-body">
@@ -98,13 +99,21 @@
 
                                     {# Form for Mark as Answered button (only show if not answered) #}
                                     {% if not request.is_answered %}
-                                        <form action="{{ url_for('mark_as_answered', request_id=request.id) }}" method="POST">
+                                        <form action="{{ url_for('mark_as_answered', request_id=request.id) }}" method="POST" class="me-2">
                                             <button type="submit" class="btn btn-success btn-sm">Mark as Answered</button>
                                         </form>
                                     {% else %}
                                         {# Optional: Display something else if answered, or just remove the button #}
-                                        <small class="text-muted">Prayer answered.</small>
+                                        <small class="text-muted me-2">Prayer answered.</small>
                                     {% endif %}
+
+                                    {# NEW: Link/Button to Edit Request #}
+                                    <a href="{{ url_for('edit_request', request_id=request.id) }}" class="btn btn-info btn-sm me-2">Edit</a>
+
+                                    {# Form for Delete button #}
+                                    <form action="{{ url_for('delete_request', request_id=request.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this prayer request?');">
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
