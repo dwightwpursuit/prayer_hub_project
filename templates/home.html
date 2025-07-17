@@ -22,7 +22,31 @@
 </head>
 <body>
     <div class="container">
+        {# NEW: Navigation/Auth Links #}
+        <div class="d-flex justify-content-end my-3">
+            {% if session.user_id %}
+                <span class="navbar-text me-3">Logged in as: {{ session.username if session.username else 'User' }}</span> {# Optional: display username if you fetch it into session #}
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-sm me-2">Login</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Register</a>
+            {% endif %}
+        </div>
+        {# END NEW Navigation/Auth Links #}
+
         <h1 class="my-4 text-center">Community Prayer Hub</h1>
+
+        {# Flash messages #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         {# Filter by Category Section #}
         <div class="card mb-4">
@@ -68,7 +92,7 @@
         <h2 class="mb-4 text-center">Current Prayer Requests</h2>
 
         {# IMPORTANT: This 'row' div is essential for Bootstrap's column system. #}
-        {# It must wrap all the 'col-md-6 col-lg-4' divs. #}
+        {# It must wrap all the 'col-md-6 col-lg-4' divs to prevent vertical stacking. #}
         <div class="row">
             {% if requests %}
                 {% for request in requests %}
@@ -78,7 +102,10 @@
                             <div class="card-body">
                                 <h5 class="card-title">{{ request.request_text }}</h5>
                                 <div class="prayer-meta">
-                                    Submitted: {{ request.timestamp }}
+                                    Submitted: {{ request.formatted_timestamp }}
+                                    {% if request.username %} {# NEW: Display username if available #}
+                                        by {{ request.username }}
+                                    {% endif %}
                                     <span class="badge bg-secondary ms-2">Prayed For: {{ request.prayed_for_count }}</span>
                                     {# Display Category if it exists #}
                                     {% if request.category %}
@@ -107,7 +134,7 @@
                                         <small class="text-muted me-2">Prayer answered.</small>
                                     {% endif %}
 
-                                    {# NEW: Link/Button to Edit Request #}
+                                    {# Link/Button to Edit Request #}
                                     <a href="{{ url_for('edit_request', request_id=request.id) }}" class="btn btn-info btn-sm me-2">Edit</a>
 
                                     {# Form for Delete button #}
