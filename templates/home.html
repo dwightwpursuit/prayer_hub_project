@@ -25,7 +25,7 @@
         {# NEW: Navigation/Auth Links #}
         <div class="d-flex justify-content-end my-3">
             {% if session.user_id %}
-                <span class="navbar-text me-3">Logged in as: {{ session.username if session.username else 'User' }}</span> {# Optional: display username if you fetch it into session #}
+                <span class="navbar-text me-3">Logged in as: <strong>{{ session.username }}</strong></span> {# UPDATED: Display actual username #}
                 <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
             {% else %}
                 <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-sm me-2">Login</a>
@@ -84,6 +84,11 @@
                         <label for="category" class="form-label">Category (Optional):</label>
                         <input type="text" class="form-control" id="category" name="category" placeholder="e.g., Health, Family, Finances">
                     </div>
+                    {# NEW: Anonymous checkbox #}
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_anonymous" name="is_anonymous">
+                        <label class="form-check-label" for="is_anonymous">Post Anonymously</label>
+                    </div>
                     <button type="submit" class="btn btn-primary">Submit Prayer</button>
                 </form>
             </div>
@@ -103,7 +108,9 @@
                                 <h5 class="card-title">{{ request.request_text }}</h5>
                                 <div class="prayer-meta">
                                     Submitted: {{ request.formatted_timestamp }}
-                                    {% if request.username %} {# NEW: Display username if available #}
+                                    {% if request.is_anonymous %} {# NEW: Check if anonymous #}
+                                        by Anonymous
+                                    {% elif request.username %} {# Display username if not anonymous and available #}
                                         by {{ request.username }}
                                     {% endif %}
                                     <span class="badge bg-secondary ms-2">Prayed For: {{ request.prayed_for_count }}</span>
@@ -124,23 +131,27 @@
                                         <button type="submit" class="btn btn-light-outline">Pray for this</button>
                                     </form>
 
-                                    {# Form for Mark as Answered button (only show if not answered) #}
-                                    {% if not request.is_answered %}
+                                    {# Form for Mark as Answered button (only show if not answered and is owner) #}
+                                    {% if not request.is_answered and request.is_owner %}
                                         <form action="{{ url_for('mark_as_answered', request_id=request.id) }}" method="POST" class="me-2">
                                             <button type="submit" class="btn btn-success btn-sm">Mark as Answered</button>
                                         </form>
-                                    {% else %}
+                                    {% elif request.is_answered %}
                                         {# Optional: Display something else if answered, or just remove the button #}
                                         <small class="text-muted me-2">Prayer answered.</small>
                                     {% endif %}
 
-                                    {# Link/Button to Edit Request #}
-                                    <a href="{{ url_for('edit_request', request_id=request.id) }}" class="btn btn-info btn-sm me-2">Edit</a>
+                                    {# Link/Button to Edit Request (only show if owner) #}
+                                    {% if request.is_owner %}
+                                        <a href="{{ url_for('edit_request', request_id=request.id) }}" class="btn btn-info btn-sm me-2">Edit</a>
+                                    {% endif %}
 
-                                    {# Form for Delete button #}
-                                    <form action="{{ url_for('delete_request', request_id=request.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this prayer request?');">
-                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                    </form>
+                                    {# Form for Delete button (only show if owner) #}
+                                    {% if request.is_owner %}
+                                        <form action="{{ url_for('delete_request', request_id=request.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this prayer request?');">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
